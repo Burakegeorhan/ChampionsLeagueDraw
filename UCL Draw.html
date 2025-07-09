@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<title>Şampiyonlar Ligi 2024-25 Kura Simülasyonu</title>
+<style>
+  body {
+    background-color: #0a0a23;
+    color: white;
+    font-family: Arial, sans-serif;
+    padding: 20px;
+    text-align: center;
+  }
+  h1 {
+    color: #ffd700;
+  }
+  button {
+    background-color: #ffd700;
+    border: none;
+    color: #0a0a23;
+    padding: 10px 20px;
+    font-size: 18px;
+    cursor: pointer;
+    border-radius: 5px;
+    margin: 10px 5px;
+  }
+  button:hover {
+    background-color: #e5c100;
+  }
+  .team-matchups {
+    max-width: 900px;
+    margin: 20px auto;
+    text-align: left;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+  }
+  .team-card {
+    background-color: #1e1e40;
+    border: 2px solid #ffd700;
+    border-radius: 10px;
+    width: 280px;
+    padding: 15px;
+  }
+  .team-card h3 {
+    margin-top: 0;
+    color: #ffd700;
+    font-size: 20px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+  }
+  .opponents {
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
+  }
+  .opponents li {
+    padding: 4px 0;
+    border-bottom: 1px solid #444;
+  }
+  .team-logo {
+    width: 40px;
+    height: 40px;
+    margin-right: 10px;
+  }
+</style>
+</head>
+<body>
+
+<h1>🏆 Şampiyonlar Ligi 2024-25 Kura Simülasyonu</h1>
+<button id="draw-btn" onclick="runDraw()">Kura Çek</button>
+
+<div id="results" class="team-matchups"></div>
+
+<script>
+const pot1 = [
+  {name: "PSG", country: "FRA"},
+  {name: "Real Madrid", country: "ESP"},
+  {name: "Manchester City", country: "ENG"},
+  {name: "Bayern Münih", country: "GER"},
+  {name: "Liverpool", country: "ENG"},
+  {name: "Inter", country: "ITA"},
+  {name: "Chelsea", country: "ENG"},
+  {name: "Borussia Dortmund", country: "GER"},
+  {name: "Barcelona", country: "ESP"},
+];
+
+const pot2 = [
+  {name: "Arsenal", country: "ENG"},
+  {name: "Atletico Madrid", country: "ESP"},
+  {name: "Juventus", country: "ITA"},
+  {name: "Benfica", country: "POR"},
+  {name: "Villarreal", country: "ESP"},
+  {name: "Bayer Leverkusen", country: "GER"},
+  {name: "Atalanta", country: "ITA"},
+  {name: "Eintracht Frankfurt", country: "GER"},
+  {name: "Club Brugge", country: "BEL"},
+];
+
+const pot3 = [
+  {name: "Tottenham Hotspur", country: "ENG"},
+  {name: "PSV", country: "NED"},
+  {name: "Ajax", country: "NED"},
+  {name: "Napoli", country: "ITA"},
+  {name: "Sporting Lizbon", country: "POR"},
+  {name: "Olympiakos", country: "GRE"},
+  {name: "Slavia Prag", country: "CZE"},
+  {name: "Bodø/Glimt", country: "NOR"},
+  {name: "Marseille", country: "FRA"},
+];
+
+const pot4 = [
+  {name: "Kopenhag", country: "DEN"},
+  {name: "Crvena Zvezda", country: "SRB"},
+  {name: "Monaco", country: "FRA"},
+  {name: "Ferencvaros", country: "HUN"},
+  {name: "Galatasaray", country: "TUR"},
+  {name: "Celtic", country: "SCO"},
+  {name: "Union St. Gillois", country: "BEL"},
+  {name: "Athletic Club", country: "ESP"},
+  {name: "Newcastle", country: "ENG"},
+];
+
+const pots = [pot1, pot2, pot3, pot4];
+const allTeams = [...pot1, ...pot2, ...pot3, ...pot4];
+
+const teamLogos = {
+  "PSG": "https://upload.wikimedia.org/wikipedia/en/thumb/a/a7/Paris_Saint-Germain_F.C..svg/120px-Paris_Saint-Germain_F.C..svg.png",
+  "Real Madrid": "https://upload.wikimedia.org/wikipedia/en/thumb/5/56/Real_Madrid_CF.svg/120px-Real_Madrid_CF.svg.png",
+  "Manchester City": "https://upload.wikimedia.org/wikipedia/en/thumb/e/eb/Manchester_City_FC_badge.svg/120px-Manchester_City_FC_badge.svg.png",
+  "Bayern Münih": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Logo_FC_Bayern_M%C3%BCnchen_%282002%E2%80%932017%29.svg/768px-Logo_FC_Bayern_M%C3%BCnchen_%282002%E2%80%932017%29.svg.png",
+  "Liverpool": "https://upload.wikimedia.org/wikipedia/en/thumb/0/0c/Liverpool_FC.svg/120px-Liverpool_FC.svg.png",
+  "Inter": "https://img.fcbayern.com/image/upload/f_auto/q_auto/t_cms-1x1-seo-thumbnail/v1661767486/cms/public/images/fcbayern-com/logos/international/Inter_Mailand_Logo.png",
+  "Chelsea": "https://upload.wikimedia.org/wikipedia/en/thumb/c/cc/Chelsea_FC.svg/120px-Chelsea_FC.svg.png",
+  "Borussia Dortmund": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/67/Borussia_Dortmund_logo.svg/120px-Borussia_Dortmund_logo.svg.png",
+  "Barcelona": "https://upload.wikimedia.org/wikipedia/en/thumb/4/47/FC_Barcelona_%28crest%29.svg/120px-FC_Barcelona_%28crest%29.svg.png",
+
+  "Arsenal": "https://upload.wikimedia.org/wikipedia/en/thumb/5/53/Arsenal_FC.svg/120px-Arsenal_FC.svg.png",
+  "Atletico Madrid": "https://upload.wikimedia.org/wikipedia/tr/1/1a/Atl%C3%A9tico_Madrid_logo.png",
+  "Juventus": "https://i.pinimg.com/originals/14/6e/0f/146e0f3a0694840f9349e5edf0e7b1f1.png",
+  "Benfica": "https://upload.wikimedia.org/wikipedia/tr/d/dc/SL_Benfica.png",
+  "Villarreal": "https://upload.wikimedia.org/wikipedia/tr/f/fc/Villarreal_CF_logo.png",
+  "Bayer Leverkusen": "https://upload.wikimedia.org/wikipedia/tr/a/a2/Bayer_Leverkusen.png",
+  "Atalanta": "https://upload.wikimedia.org/wikipedia/en/thumb/6/66/AtalantaBC.svg/1200px-AtalantaBC.svg.png",
+  "Eintracht Frankfurt": "https://upload.wikimedia.org/wikipedia/en/thumb/7/7e/Eintracht_Frankfurt_crest.svg/1200px-Eintracht_Frankfurt_crest.svg.png",
+  "Club Brugge": "https://upload.wikimedia.org/wikipedia/sco/thumb/d/d0/Club_Brugge_KV_logo.svg/1727px-Club_Brugge_KV_logo.svg.png",
+
+  "Tottenham Hotspur": "https://upload.wikimedia.org/wikipedia/en/thumb/b/b4/Tottenham_Hotspur.svg/120px-Tottenham_Hotspur.svg.png",
+  "PSV": "https://upload.wikimedia.org/wikipedia/sco/thumb/0/05/PSV_Eindhoven.svg/1280px-PSV_Eindhoven.svg.png",
+  "Ajax": "https://upload.wikimedia.org/wikipedia/en/thumb/7/79/Ajax_Amsterdam.svg/120px-Ajax_Amsterdam.svg.png",
+  "Napoli": "https://images.seeklogo.com/logo-png/55/2/ssc-napoli-logo-png_seeklogo-550076.png",
+  "Sporting Lizbon": "https://upload.wikimedia.org/wikipedia/tr/6/61/Sporting_Lizbon_logo.png",
+  "Olympiakos": "https://upload.wikimedia.org/wikipedia/tr/b/b5/Olympiakos_%28futbol_tak%C4%B1m%C4%B1%29.png",
+  "Slavia Prag": "https://upload.wikimedia.org/wikipedia/commons/9/90/Slavia-symbol-nowordmark-RGB.png",
+  "Bodø/Glimt": "https://brandlogos.net/wp-content/uploads/2020/01/fk_bodo_glimt-logo_brandlogos.net_wcnbr.png",
+  "Marseille": "https://upload.wikimedia.org/wikipedia/tr/c/c1/Olympique_de_Marseille.png",
+
+  "Kopenhag": "https://upload.wikimedia.org/wikipedia/tr/e/ea/FC_K%C3%B8benhavn.png",
+  "Crvena Zvezda": "https://upload.wikimedia.org/wikipedia/en/thumb/c/c2/Red_Star_Belgrade_crest.svg/1200px-Red_Star_Belgrade_crest.svg.png",
+  "Monaco": "https://upload.wikimedia.org/wikipedia/tr/6/6d/As_monaco_2013_logo.png",
+  "Ferencvaros": "https://upload.wikimedia.org/wikipedia/commons/5/5c/Ferencv%C3%A1rosiTClog%C3%B3.png",
+  "Galatasaray": "https://images.seeklogo.com/logo-png/61/3/galatasaray-5-stars-logo-png_seeklogo-618553.png?v=1962276611884875832",
+  "Celtic": "https://upload.wikimedia.org/wikipedia/tr/3/39/Celtic_FC_logo.png",
+  "Union St. Gillois": "https://static.standard.be/cdn/ff/klSavtujaT_Yy6hwf9DFB6D3bem1BktyjO80HBsEUbU/1746619954/public/styles/max_0640/public/2017-04/un_saint_gilloise.png.webp?itok=VeodmMPE",
+  "Athletic Club": "https://upload.wikimedia.org/wikipedia/tr/d/d9/Athleticbilbao.png",
+  "Newcastle": "https://upload.wikimedia.org/wikipedia/en/thumb/5/56/Newcastle_United_Logo.svg/120px-Newcastle_United_Logo.svg.png",
+};
+
+function shuffle(array) {
+  const arr = array.slice();
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function runDraw() {
+  const resultsDiv = document.getElementById("results");
+  resultsDiv.innerHTML = "";
+
+  const teamMatchups = {};
+  for (const team of allTeams) {
+    teamMatchups[team.name] = [];
+  }
+
+  for (const team of allTeams) {
+    let opponents = [];
+    const selectedNames = new Set();
+
+    for (let i = 0; i < pots.length; i++) {
+      const pot = pots[i];
+      const candidates = shuffle(
+        pot.filter(
+          t =>
+            t.name !== team.name &&
+            t.country !== team.country &&
+            !selectedNames.has(t.name)
+        )
+      );
+
+      let count = 0;
+      for (const c of candidates) {
+        if (count >= 2) break;
+        opponents.push(c);
+        selectedNames.add(c.name);
+        count++;
+      }
+    }
+
+    if (opponents.length < 8) {
+      const needed = 8 - opponents.length;
+      const extras = shuffle(allTeams).filter(
+        t =>
+          t.name !== team.name &&
+          t.country !== team.country &&
+          !selectedNames.has(t.name)
+      ).slice(0, needed);
+      opponents.push(...extras);
+    }
+
+    teamMatchups[team.name] = opponents;
+  }
+
+  for (const teamName in teamMatchups) {
+    const card = document.createElement("div");
+    card.className = "team-card";
+
+    card.innerHTML = `
+      <h3><img src="${teamLogos[teamName]}" alt="${teamName} logosu" class="team-logo" /> ${teamName}</h3>
+      <ul class="opponents">
+        ${teamMatchups[teamName].map(o => `<li>${o.name} (${o.country})</li>`).join('')}
+      </ul>
+    `;
+
+    resultsDiv.appendChild(card);
+  }
+}
+</script>
+
+</body>
+</html>
